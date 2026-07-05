@@ -76,6 +76,7 @@ async function main() {
         name: toolNames[i],
         website: `https://${toolNames[i].toLowerCase().replace(/[^a-z]+/g, "")}.example.com`,
         description: `${toolNames[i]} is an AI-powered productivity tool built for modern teams.`,
+        imageUrl: `https://picsum.photos/seed/tool-${i}/480/270`,
         pricing: pricingOptions[i % pricingOptions.length],
         rating: Number((3.5 + (i % 5) * 0.3).toFixed(1)),
         bookmarks: 80 + i * 47,
@@ -116,9 +117,15 @@ async function main() {
     { title: "Free AI Toolkit", curator: "Community", itemCount: 40 },
     { title: "Enterprise-Ready AI", curator: "Editorial Team", itemCount: 12 },
   ];
-  for (const c of collectionData) {
+  for (let i = 0; i < collectionData.length; i++) {
+    const c = collectionData[i];
     await prisma.collection.create({
-      data: { ...c, description: `A curated set of ${c.itemCount} standout tools.`, status: "PUBLISHED" },
+      data: {
+        ...c,
+        imageUrl: `https://picsum.photos/seed/collection-${i}/480/270`,
+        description: `A curated set of ${c.itemCount} standout tools.`,
+        status: "PUBLISHED",
+      },
     });
   }
 
@@ -131,9 +138,15 @@ async function main() {
     { title: "New open-source model tops leaderboard", category: "Research", author: "J. Chen" },
     { title: "Enterprise AI spend doubles year over year", category: "Funding", author: "M. Osei" },
   ];
-  for (const n of newsData) {
+  for (let i = 0; i < newsData.length; i++) {
+    const n = newsData[i];
     await prisma.news.create({
-      data: { ...n, body: "Full article content goes here...", status: "PUBLISHED" },
+      data: {
+        ...n,
+        imageUrl: `https://picsum.photos/seed/news-${i}/480/270`,
+        body: "Full article content goes here...",
+        status: "PUBLISHED",
+      },
     });
   }
 
@@ -150,6 +163,7 @@ async function main() {
       data: {
         ...videoData[i],
         embedUrl: "https://youtube.com/embed/example",
+        imageUrl: `https://picsum.photos/seed/video-${i}/480/270`,
         views: 3400 + i * 980,
         status: "PUBLISHED",
       },

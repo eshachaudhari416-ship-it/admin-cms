@@ -8,7 +8,7 @@ import { z } from "zod";
  * adding one entry here — no new components or route files needed.
  */
 
-export type FieldType = "text" | "textarea" | "select" | "bool" | "number";
+export type FieldType = "text" | "textarea" | "select" | "bool" | "number" | "image";
 export type ColumnType = "text" | "mono" | "number" | "bool" | "status" | "date" | "rating";
 
 export interface FieldDef {
@@ -36,6 +36,7 @@ export interface EntityConfig {
   fields: FieldDef[];
   schema: z.ZodTypeAny; // used for POST (create)
   updateSchema: z.ZodTypeAny; // used for PUT (partial update)
+  hasImageView?: boolean; // offer a card/grid view alongside the table
 }
 
 const CONTENT_STATUSES = ["PUBLISHED", "DRAFT", "FLAGGED", "ARCHIVED"] as const;
@@ -43,6 +44,7 @@ const CONTENT_STATUSES = ["PUBLISHED", "DRAFT", "FLAGGED", "ARCHIVED"] as const;
 const toolSchema = z.object({
   name: z.string().min(1, "Name is required"),
   website: z.string().url("Must be a valid URL"),
+  imageUrl: z.string().url("Must be a valid URL").optional().or(z.literal("")).nullable(),
   description: z.string().min(1, "Description is required"),
   pricing: z.enum(["FREE", "FREEMIUM", "PAID"]),
   status: z.enum(CONTENT_STATUSES),
@@ -83,6 +85,7 @@ const categorySchema = z.object({
 const collectionSchema = z.object({
   title: z.string().min(1, "Title is required"),
   curator: z.string().min(1, "Curator is required"),
+  imageUrl: z.string().url("Must be a valid URL").optional().or(z.literal("")).nullable(),
   description: z.string().optional().nullable(),
   status: z.enum(CONTENT_STATUSES),
 });
@@ -91,6 +94,7 @@ const newsSchema = z.object({
   title: z.string().min(1, "Title is required"),
   category: z.string().min(1, "Category is required"),
   author: z.string().min(1, "Author is required"),
+  imageUrl: z.string().url("Must be a valid URL").optional().or(z.literal("")).nullable(),
   body: z.string().min(1, "Body is required"),
   status: z.enum(CONTENT_STATUSES),
 });
@@ -99,6 +103,7 @@ const videoSchema = z.object({
   title: z.string().min(1, "Title is required"),
   channel: z.string().min(1, "Channel is required"),
   embedUrl: z.string().url("Must be a valid URL"),
+  imageUrl: z.string().url("Must be a valid URL").optional().or(z.literal("")).nullable(),
   duration: z.string().regex(/^\d{1,2}:\d{2}$/, "Use mm:ss format"),
   status: z.enum(CONTENT_STATUSES),
 });
@@ -133,6 +138,7 @@ export const ENTITY_REGISTRY: Record<string, EntityConfig> = {
     titleField: "name",
     searchField: "name",
     statusEnum: [...CONTENT_STATUSES],
+    hasImageView: true,
     columns: [
       { key: "name", label: "Tool", type: "text" },
       { key: "pricing", label: "Pricing", type: "text" },
@@ -143,6 +149,7 @@ export const ENTITY_REGISTRY: Record<string, EntityConfig> = {
     fields: [
       { key: "name", label: "Tool name", type: "text", required: true },
       { key: "website", label: "Website URL", type: "text", required: true },
+      { key: "imageUrl", label: "Image URL", type: "image" },
       { key: "description", label: "Description", type: "textarea", required: true },
       { key: "pricing", label: "Pricing model", type: "select", options: ["FREE", "FREEMIUM", "PAID"], required: true },
       { key: "status", label: "Status", type: "select", options: [...CONTENT_STATUSES], required: true },
@@ -231,6 +238,7 @@ export const ENTITY_REGISTRY: Record<string, EntityConfig> = {
     titleField: "title",
     searchField: "title",
     statusEnum: [...CONTENT_STATUSES],
+    hasImageView: true,
     columns: [
       { key: "title", label: "Collection", type: "text" },
       { key: "curator", label: "Curator", type: "text" },
@@ -240,6 +248,7 @@ export const ENTITY_REGISTRY: Record<string, EntityConfig> = {
     fields: [
       { key: "title", label: "Collection title", type: "text", required: true },
       { key: "curator", label: "Curator", type: "text", required: true },
+      { key: "imageUrl", label: "Image URL", type: "image" },
       { key: "description", label: "Description", type: "textarea" },
       { key: "status", label: "Status", type: "select", options: [...CONTENT_STATUSES], required: true },
     ],
@@ -253,6 +262,7 @@ export const ENTITY_REGISTRY: Record<string, EntityConfig> = {
     titleField: "title",
     searchField: "title",
     statusEnum: [...CONTENT_STATUSES],
+    hasImageView: true,
     columns: [
       { key: "title", label: "Headline", type: "text" },
       { key: "category", label: "Category", type: "text" },
@@ -264,6 +274,7 @@ export const ENTITY_REGISTRY: Record<string, EntityConfig> = {
       { key: "title", label: "Headline", type: "text", required: true },
       { key: "category", label: "Category", type: "text", required: true },
       { key: "author", label: "Author", type: "text", required: true },
+      { key: "imageUrl", label: "Image URL", type: "image" },
       { key: "body", label: "Article body", type: "textarea", required: true },
       { key: "status", label: "Status", type: "select", options: [...CONTENT_STATUSES], required: true },
     ],
@@ -277,6 +288,7 @@ export const ENTITY_REGISTRY: Record<string, EntityConfig> = {
     titleField: "title",
     searchField: "title",
     statusEnum: [...CONTENT_STATUSES],
+    hasImageView: true,
     columns: [
       { key: "title", label: "Title", type: "text" },
       { key: "channel", label: "Channel", type: "text" },
@@ -288,6 +300,7 @@ export const ENTITY_REGISTRY: Record<string, EntityConfig> = {
       { key: "title", label: "Video title", type: "text", required: true },
       { key: "channel", label: "Channel", type: "text", required: true },
       { key: "embedUrl", label: "Embed URL", type: "text", required: true },
+      { key: "imageUrl", label: "Thumbnail Image URL", type: "image" },
       { key: "duration", label: "Duration (mm:ss)", type: "text", required: true },
       { key: "status", label: "Status", type: "select", options: [...CONTENT_STATUSES], required: true },
     ],

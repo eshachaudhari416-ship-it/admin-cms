@@ -2,15 +2,144 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
 
-body {
-  background: #0a0a0d;
-  color: #f2f2f5;
-  font-family: 'Inter', sans-serif;
+:root {
+  --background: #0b1220;
+  --surface: #111827;
+  --surface-2: #1e293b;
+  --card: #162033;
+
+  --border: #263244;
+
+  --primary: #6366f1;
+  --primary-hover: #4f46e5;
+
+  --text: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
+
+  --success: #22c55e;
+  --warning: #f59e0b;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--background);
+  color: var(--text);
+  font-family: "Inter", sans-serif;
+  overflow-x: hidden;
+}
+
+/* Scrollbar */
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0b1220;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
+
+/* Selection */
+
+::selection {
+  background: #6366f1;
+  color: white;
+}
+
+/* Cards */
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  transition: all 0.25s ease;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  border-color: #4f46e5;
+  box-shadow: 0 12px 35px rgba(99,102,241,.15);
+}
+
+/* Buttons */
+
+.btn-primary {
+  background: var(--primary);
+  color: white;
+  border-radius: 14px;
+  padding: .7rem 1.2rem;
+  font-weight: 600;
+  transition: .2s;
+}
+
+.btn-primary:hover {
+  background: var(--primary-hover);
+}
+
+/* Inputs */
+
+.input {
+  background: #111827;
+  border: 1px solid #2d3a4d;
+  color: white;
+  border-radius: 14px;
+  padding: .8rem 1rem;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99,102,241,.2);
+}
+
+/* Chips */
+
+.chip {
+  border-radius: 999px;
+  background: #1e293b;
+  color: #cbd5e1;
+  padding: .45rem .9rem;
+  font-size: .85rem;
+  transition: .2s;
+}
+
+.chip:hover {
+  background: #334155;
+}
+
+.chip-active {
+  background: #6366f1;
+  color: white;
+}
+
+/* Fade */
+
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(4px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  animation: fadeIn .35s ease;
 }

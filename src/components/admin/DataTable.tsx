@@ -1,15 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowUpDown, Pencil, Plus, Search, Trash2, ChevronLeft, ChevronRight, Star } from "lucide-react";
+import { ArrowUpDown, Pencil, Plus, Search, Trash2, ChevronLeft, ChevronRight, Star, BarChart2, LayoutGrid, List, Lock, Unlock } from "lucide-react";
 import { EntityConfig } from "@/lib/entities";
 import { useEntityData } from "@/hooks/useEntityData";
+import { avatarStyle } from "@/lib/avatarColor";
 import { StatusBadge, statusColor } from "./StatusBadge";
 import { EmptyState, ErrorState, LoadingRows } from "./EmptyState";
 import { EntityForm } from "./EntityForm";
 import { ConfirmDialog } from "./ConfirmDialog";
+import { CardGrid } from "./CardGrid";
 import { Button } from "@/components/ui/Button";
-import { Input, Select } from "@/components/ui/Input";
+import { Input } from "@/components/ui/Input";
 import { Checkbox } from "@/components/ui/Checkbox";
 
 function fmtNum(n: number) {
@@ -33,6 +35,7 @@ export function DataTable({ config }: { config: EntityConfig }) {
   const [showForm, setShowForm] = useState(false);
   const [deleting, setDeleting] = useState<Row | null>(null);
   const [busy, setBusy] = useState(false);
+  const [viewMode, setViewMode] = useState<"table" | "grid">(config.hasImageView ? "grid" : "table");
 
   const { rows, total, totalPages, viewState, errorMessage, refetch } = useEntityData<Row>(config.slug, {
     search,
@@ -110,14 +113,32 @@ export function DataTable({ config }: { config: EntityConfig }) {
           <h2 className="font-display text-xl font-bold">{config.label}</h2>
           <p className="mt-0.5 text-sm text-text-dim">{total} total entries</p>
         </div>
-        <Button
-          onClick={() => {
-            setEditing(null);
-            setShowForm(true);
-          }}
-        >
-          <Plus size={14} /> Add {config.label.replace(/s$/, "")}
-        </Button>
+        <div className="flex items-center gap-2">
+          {config.hasImageView && (
+            <div className="flex gap-0.5 rounded-lg border border-border bg-surface2 p-0.5">
+              <button
+                onClick={() => setViewMode("grid")}
+                className={`rounded-md p-1.5 ${viewMode === "grid" ? "bg-surface3 text-text" : "text-text-faint hover:text-text-dim"}`}
+              >
+                <LayoutGrid size={15} />
+              </button>
+              <button
+                onClick={() => setViewMode("table")}
+                className={`rounded-md p-1.5 ${viewMode === "table" ? "bg-surface3 text-text" : "text-text-faint hover:text-text-dim"}`}
+              >
+                <List size={15} />
+              </button>
+            </div>
+          )}
+          <Button
+            onClick={() => {
+              setEditing(null);
+              setShowForm(true);
+            }}
+          >
+            <Plus size={14} /> Add {config.label.replace(/s$/, "")}
+          </Button>
+        </div>
       </div>
 
       <div className="mb-3 flex flex-wrap items-center gap-2.5 rounded-xl border border-border bg-surface p-3.5">
@@ -133,23 +154,6 @@ export function DataTable({ config }: { config: EntityConfig }) {
             }}
           />
         </div>
-        {config.statusEnum && (
-          <Select
-            className="w-40"
-            value={status}
-            onChange={(e) => {
-              setPage(1);
-              setStatus(e.target.value);
-            }}
-          >
-            <option value="all">All statuses</option>
-            {config.statusEnum.map((s) => (
-              <option key={s} value={s}>
-                {s.charAt(0) + s.slice(1).toLowerCase()}
-              </option>
-            ))}
-          </Select>
-        )}
         {selected.length > 0 && (
           <Button variant="danger" onClick={handleBulkDelete} disabled={busy}>
             <Trash2 size={13} /> Delete {selected.length} selected
@@ -157,6 +161,54 @@ export function DataTable({ config }: { config: EntityConfig }) {
         )}
       </div>
 
+      {config.statusEnum && (
+        <div className="mb-3 flex flex-wrap items-center gap-2">
+          <button
+            onClick={() => {
+              setPage(1);
+              setStatus("all");
+            }}
+            className={`rounded-full border px-3 py-1.5 text-sm font-semibold transition-colors ${
+              status === "all"
+                ? "border-accent bg-accent text-white"
+                : "border-border bg-surface2 text-text-dim hover:bg-surface3 hover:text-text"
+            }`}
+          >
+            All {config.label}
+          </button>
+          {config.statusEnum.map((s) => (
+            <button
+              key={s}
+              onClick={() => {
+                setPage(1);
+                setStatus(s);
+              }}
+              className={`rounded-full border px-3 py-1.5 text-sm font-semibold transition-colors ${
+                status === s
+                  ? "border-accent bg-accent text-white"
+                  : "border-border bg-surface2 text-text-dim hover:bg-surface3 hover:text-text"
+              }`}
+            >
+              {s.charAt(0) + s.slice(1).toLowerCase()}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {viewMode === "grid" && config.hasImageView ? (
+        <CardGrid
+          config={config}
+          rows={rows}
+          viewState={viewState}
+          errorMessage={errorMessage}
+          refetch={refetch}
+          onEdit={(row) => {
+            setEditing(row);
+            setShowForm(true);
+          }}
+          onDelete={(row) => setDeleting(row)}
+        />
+      ) : (
       <div className="overflow-x-auto rounded-xl border border-border bg-surface">
         <table className="w-full border-collapse">
           <thead>
@@ -215,15 +267,38 @@ export function DataTable({ config }: { config: EntityConfig }) {
                             <span className="text-text-faint">No</span>
                           ))}
                         {col.type === "date" && <span className="font-mono text-xs text-text-dim">{fmtDate(row[col.key])}</span>}
-                        {col.type === "number" && <span className="font-mono">{fmtNum(row[col.key])}</span>}
+                        {col.type === "number" && (
+                          <span className="inline-flex items-center gap-1 font-mono text-text-dim">
+                            <BarChart2 size={11} /> {fmtNum(row[col.key])}
+                          </span>
+                        )}
                         {col.type === "mono" && <span className="font-mono text-xs text-text-dim">{row[col.key]}</span>}
                         {col.type === "rating" && (
                           <span className="inline-flex items-center gap-1">
                             <Star size={12} fill="#ffb84d" color="#ffb84d" /> {row[col.key]}
                           </span>
                         )}
-                        {col.type === "text" && (
-                          <span className={col.key === config.titleField ? "font-semibold" : ""}>{row[col.key]}</span>
+                        {col.type === "text" && col.key === config.titleField && (
+                          <span className="inline-flex items-center gap-2.5">
+                            <span
+                              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold"
+                              style={{ background: avatarStyle(row[col.key] || "?").bg, color: avatarStyle(row[col.key] || "?").text }}
+                            >
+                              {(row[col.key] || "?").charAt(0).toUpperCase()}
+                            </span>
+                            <span className="font-semibold">{row[col.key]}</span>
+                          </span>
+                        )}
+                        {col.type === "text" && col.key !== config.titleField && (
+                          <span className="inline-flex items-center gap-1 rounded-full border border-border bg-surface2 px-2.5 py-0.5 text-xs font-medium text-text-dim">
+                            {col.key === "pricing" &&
+                              (row[col.key] === "PAID" ? (
+                                <Lock size={10} />
+                              ) : (
+                                <Unlock size={10} />
+                              ))}
+                            {row[col.key]}
+                          </span>
                         )}
                       </td>
                     ))}
@@ -249,6 +324,7 @@ export function DataTable({ config }: { config: EntityConfig }) {
           </tbody>
         </table>
       </div>
+      )}
 
       {viewState === "idle" && rows.length > 0 && (
         <div className="mt-3 flex items-center justify-between">

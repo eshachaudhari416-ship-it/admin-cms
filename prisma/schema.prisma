@@ -1,136 +1,176 @@
+// Admin CMS (Module 12) data model.
+// Owns: Tools, Companies, Models, Categories, Collections, News, Videos,
+// Repositories, Users, Reports — matching the shared platform schema so
+// other modules (Tools listing, Company pages, etc.) read the same tables.
+
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "postgresql" // swap to "sqlite" for local dev, see .env.example
   url      = env("DATABASE_URL")
 }
 
+enum Role {
+  ADMIN
+  EDITOR
+  MEMBER
+}
+
+enum ContentStatus {
+  PUBLISHED
+  DRAFT
+  FLAGGED
+  ARCHIVED
+}
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+  PENDING
+}
+
+enum ReportStatus {
+  PENDING
+  RESOLVED
+  FLAGGED
+}
+
+enum Pricing {
+  FREE
+  FREEMIUM
+  PAID
+}
+
 model User {
-  id        String   @id @default(cuid())
+  id        String     @id @default(cuid())
   name      String
-  email     String   @unique
-  role      String   @default("MEMBER")
-  status    String   @default("ACTIVE")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  email     String     @unique
+  role      Role       @default(MEMBER)
+  status    UserStatus @default(ACTIVE)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
   reports   Report[]
 }
 
 model Category {
-  id        String   @id @default(cuid())
+  id        String        @id @default(cuid())
   name      String
-  slug      String   @unique
-  popular   Boolean  @default(false)
-  status    String   @default("DRAFT")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  slug      String        @unique
+  popular   Boolean       @default(false)
+  status    ContentStatus @default(DRAFT)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
   tools     Tool[]
 }
 
 model Company {
-  id           String    @id @default(cuid())
+  id           String        @id @default(cuid())
   name         String
   website      String
   headquarters String
   foundedYear  Int
   funding      String?
   description  String
-  status       String    @default("DRAFT")
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  status       ContentStatus @default(DRAFT)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
   models       AiModel[]
 }
 
 model AiModel {
-  id            String   @id @default(cuid())
+  id            String        @id @default(cuid())
   name          String
   provider      String
   contextWindow String
   pricing       String?
-  openSource    Boolean  @default(false)
+  openSource    Boolean       @default(false)
   documentation String?
-  status        String   @default("DRAFT")
+  status        ContentStatus @default(DRAFT)
   companyId     String?
-  company       Company? @relation(fields: [companyId], references: [id])
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  company       Company?      @relation(fields: [companyId], references: [id])
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
 
   @@map("ai_models")
 }
 
 model Tool {
-  id          String   @id @default(cuid())
+  id          String        @id @default(cuid())
   name        String
   website     String
+  imageUrl    String?
   description String
-  pricing     String   @default("FREE")
-  rating      Float    @default(0)
-  bookmarks   Int      @default(0)
-  status      String   @default("DRAFT")
+  pricing     Pricing       @default(FREE)
+  rating      Float         @default(0)
+  bookmarks   Int           @default(0)
+  status      ContentStatus @default(DRAFT)
   categoryId  String?
-  category    Category? @relation(fields: [categoryId], references: [id])
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  category    Category?     @relation(fields: [categoryId], references: [id])
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
 }
 
 model Collection {
-  id          String   @id @default(cuid())
+  id          String        @id @default(cuid())
   title       String
   curator     String
+  imageUrl    String?
   description String?
-  itemCount   Int      @default(0)
-  status      String   @default("DRAFT")
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  itemCount   Int           @default(0)
+  status      ContentStatus @default(DRAFT)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
 }
 
 model News {
-  id        String   @id @default(cuid())
+  id        String        @id @default(cuid())
   title     String
   category  String
   author    String
+  imageUrl  String?
   body      String
-  status    String   @default("DRAFT")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  status    ContentStatus @default(DRAFT)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
 }
 
 model Video {
-  id        String   @id @default(cuid())
+  id        String        @id @default(cuid())
   title     String
   channel   String
   embedUrl  String
+  imageUrl  String?
   duration  String
-  views     Int      @default(0)
-  status    String   @default("DRAFT")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  views     Int           @default(0)
+  status    ContentStatus @default(DRAFT)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
 }
 
 model Repository {
-  id        String   @id @default(cuid())
+  id        String        @id @default(cuid())
   name      String
   githubUrl String
   language  String
   license   String
-  stars     Int      @default(0)
-  status    String   @default("DRAFT")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  stars     Int           @default(0)
+  status    ContentStatus @default(DRAFT)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
 
   @@map("repositories")
 }
 
 model Report {
-  id           String   @id @default(cuid())
+  id           String       @id @default(cuid())
   target       String
   reason       String
   notes        String?
-  status       String   @default("PENDING")
+  status       ReportStatus @default(PENDING)
   reportedById String?
-  reportedBy   User?    @relation(fields: [reportedById], references: [id])
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  reportedBy   User?        @relation(fields: [reportedById], references: [id])
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
 }
