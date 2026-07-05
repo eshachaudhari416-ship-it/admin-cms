@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, Pricing, ContentStatus, Role, UserStatus, ReportStatus } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
@@ -68,8 +68,8 @@ async function main() {
     "VoiceCast Pro", "DataSage", "PixelDream", "ScriptFlow", "InsightBot",
     "AutoDraft", "ClipGenie", "TableTalk", "BriefBot", "ReviewRadar",
   ];
-  const pricingOptions = ["FREE", "FREEMIUM", "PAID"];
-  const statusOptions = ["PUBLISHED", "PUBLISHED", "PUBLISHED", "DRAFT", "FLAGGED", "ARCHIVED"];
+  const pricingOptions: Pricing[] = ["FREE", "FREEMIUM", "PAID"];
+  const statusOptions: ContentStatus[] = ["PUBLISHED", "PUBLISHED", "PUBLISHED", "DRAFT", "FLAGGED", "ARCHIVED"];
   for (let i = 0; i < toolNames.length; i++) {
     await prisma.tool.create({
       data: {
@@ -190,8 +190,8 @@ async function main() {
     "Alex Rivera", "Priya Nandan", "Sam O'Connell", "Diego Marquez",
     "Wei Zhang", "Noor Fatima", "Liam Foster", "Grace Kim",
   ];
-  const roles = ["ADMIN", "EDITOR", "MEMBER", "MEMBER"];
-  const userStatuses = ["ACTIVE", "ACTIVE", "PENDING", "SUSPENDED"];
+  const roles: Role[] = ["ADMIN", "EDITOR", "MEMBER", "MEMBER"];
+  const userStatuses: UserStatus[] = ["ACTIVE", "ACTIVE", "PENDING", "SUSPENDED"];
   const users = [];
   for (let i = 0; i < userNames.length; i++) {
     users.push(
@@ -214,7 +214,7 @@ async function main() {
     { target: "VoiceCast Pro review", reason: "Inappropriate" },
     { target: "DataSage pricing", reason: "Inaccurate info" },
   ];
-  const reportStatuses = ["PENDING", "RESOLVED", "PENDING", "FLAGGED"];
+  const reportStatuses: ReportStatus[] = ["PENDING", "RESOLVED", "PENDING", "FLAGGED"];
   for (let i = 0; i < reportData.length; i++) {
     await prisma.report.create({
       data: {
