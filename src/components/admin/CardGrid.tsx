@@ -2,6 +2,7 @@
 
 import { ImageIcon, Pencil, Trash2, Star, BarChart2, Lock, Unlock } from "lucide-react";
 import { EntityConfig } from "@/lib/entities";
+import { avatarStyle } from "@/lib/avatarColor";
 import { StatusBadge } from "./StatusBadge";
 import { EmptyState, ErrorState } from "./EmptyState";
 import { Button } from "@/components/ui/Button";
@@ -80,7 +81,10 @@ export function CardGrid({ config, rows, viewState, errorMessage, refetch, onEdi
           key={row.id}
           className="group overflow-hidden rounded-xl border border-border bg-surface transition-colors hover:border-accent/40"
         >
-          <div className="relative aspect-video bg-surface2">
+          <div
+            className="relative aspect-video"
+            style={{ background: row.imageUrl ? undefined : avatarStyle(row[config.titleField] || "?").bg }}
+          >
             {row.imageUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
@@ -91,7 +95,7 @@ export function CardGrid({ config, rows, viewState, errorMessage, refetch, onEdi
               />
             ) : (
               <div className="flex h-full w-full items-center justify-center">
-                <ImageIcon size={22} className="text-text-faint" />
+                <ImageIcon size={22} className="text-white/70" />
               </div>
             )}
 

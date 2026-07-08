@@ -38,7 +38,7 @@ export default function AnalyticsPage() {
   return (
     <>
       <Topbar title="Analytics" />
-      <div className="flex-1 overflow-y-auto p-5.5">
+      <div className="flex-1 overflow-y-auto p-4 sm:p-5.5">
         <h2 className="font-display text-xl font-bold">Analytics</h2>
         <p className="mb-4.5 mt-0.5 text-sm text-text-dim">Live record counts across every module.</p>
 

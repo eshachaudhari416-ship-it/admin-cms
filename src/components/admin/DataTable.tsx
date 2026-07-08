@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { ArrowUpDown, Pencil, Plus, Search, Trash2, ChevronLeft, ChevronRight, Star, BarChart2, LayoutGrid, List, Lock, Unlock } from "lucide-react";
 import { EntityConfig } from "@/lib/entities";
 import { useEntityData } from "@/hooks/useEntityData";
@@ -26,6 +26,21 @@ type Row = Record<string, any>;
 
 export function DataTable({ config }: { config: EntityConfig }) {
   const [search, setSearch] = useState("");
+  const searchRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    function onKeyDown(e: KeyboardEvent) {
+      const target = e.target as HTMLElement;
+      const isTyping = ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName);
+      if (e.key === "/" && !isTyping) {
+        e.preventDefault();
+        searchRef.current?.focus();
+      }
+    }
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, []);
+
   const [status, setStatus] = useState("all");
   const [sortKey, setSortKey] = useState("createdAt");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
@@ -145,7 +160,8 @@ export function DataTable({ config }: { config: EntityConfig }) {
         <div className="relative min-w-[200px] flex-1">
           <Search size={14} className="pointer-events-none absolute left-2.5 top-2.5 text-text-faint" />
           <Input
-            className="pl-8"
+            ref={searchRef}
+            className="pl-8 pr-8"
             placeholder={`Search ${config.label.toLowerCase()}...`}
             value={search}
             onChange={(e) => {
@@ -153,6 +169,11 @@ export function DataTable({ config }: { config: EntityConfig }) {
               setSearch(e.target.value);
             }}
           />
+          {!search && (
+            <kbd className="pointer-events-none absolute right-2.5 top-2 rounded border border-border bg-surface2 px-1.5 py-0.5 font-mono text-[10px] text-text-faint">
+              /
+            </kbd>
+          )}
         </div>
         {selected.length > 0 && (
           <Button variant="danger" onClick={handleBulkDelete} disabled={busy}>
@@ -281,7 +302,7 @@ export function DataTable({ config }: { config: EntityConfig }) {
                         {col.type === "text" && col.key === config.titleField && (
                           <span className="inline-flex items-center gap-2.5">
                             <span
-                              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold"
+                              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-xs font-bold"
                               style={{ background: avatarStyle(row[col.key] || "?").bg, color: avatarStyle(row[col.key] || "?").text }}
                             >
                               {(row[col.key] || "?").charAt(0).toUpperCase()}
